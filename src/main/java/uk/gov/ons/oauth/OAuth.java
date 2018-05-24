@@ -17,7 +17,7 @@ public class OAuth {
 
     private String clientId;
     private String clientSecret;
-    private List<String> scope;
+    private String scope;
     private String tokenEndpoint;
     private String serviceEndpoint;
     private int connectTimeout = 5000;
@@ -25,32 +25,25 @@ public class OAuth {
 
     private static Logger logger = LoggerFactory.getLogger(OAuth.class);
 
-
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
-
 
     public void setClientSecret(String clientSecret) {
         this.clientSecret = clientSecret;
     }
 
-
-    public void setScope(List<String> scope) {
+    public void setScope(String scope) {
         this.scope = scope;
     }
-
 
     public void setTokenEndpoint(String tokenEndpoint) {
         this.tokenEndpoint = tokenEndpoint;
     }
 
-
     public void setServiceEndpoint(String serviceEndpoint) {
         this.serviceEndpoint = serviceEndpoint;
     }
-
-
 
     public void setConnectTimeout(int connectTimeout) {
         this.connectTimeout = connectTimeout;
@@ -109,8 +102,9 @@ public class OAuth {
             parameters.put("client_id", clientId);
             parameters.put("client_secret", clientSecret);
 
-            String s = String.join(" ", scope);
-            parameters.put("scope", s);
+            if (scope != null && scope.length != 0) {
+                parameters.put("scope", scope);
+            }
 
             con.setDoOutput(true);
 
@@ -121,7 +115,6 @@ public class OAuth {
                 con.setReadTimeout(readTimeout);
             } catch (IOException e) {
                 logger.error("Received I/O exception on creating output stream {}", e.getMessage());
-                e.printStackTrace();
                 return null;
             }
 
@@ -142,7 +135,6 @@ public class OAuth {
 
         } catch (IOException e) {
             logger.error("Received I/O on creating connection or opening stream {}", e.getMessage());
-            e.printStackTrace();
             return null;
         }
 
@@ -174,13 +166,11 @@ public class OAuth {
 
         JsonObject newJsonObject = jsonReader.readObject();
 
-        String accessToken =
-                newJsonObject.getString("access_token", "");
+        String accessToken = newJsonObject.getString("access_token", "");
         logger.info("Access Token: {}", accessToken);
         response.put("access_token", accessToken);
 
-        String tokenType =
-                newJsonObject.getString("token_type", "");
+        String tokenType = newJsonObject.getString("token_type", "");
         logger.debug("Token Type: {}", tokenType);
         response.put("token_type", tokenType);
 
@@ -188,8 +178,7 @@ public class OAuth {
         logger.debug("Expires in: {}", expires);
         response.put("expires_in", "" + expires);
 
-        String scope =
-                newJsonObject.getString("scope", "");
+        String scope = newJsonObject.getString("scope", "");
         logger.debug("scope: {}", scope);
         response.put("scope", scope);
 

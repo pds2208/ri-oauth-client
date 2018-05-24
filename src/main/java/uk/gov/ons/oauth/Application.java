@@ -45,15 +45,7 @@ public class Application {
         oa.setServiceEndpoint(serviceEndpoint);
         oa.setReadTimeout(Integer.parseInt(readTimeout));
         oa.setConnectTimeout(Integer.parseInt(connectionTimeout));
-
-        if (scope != null) {
-            List<String> sc = Stream.of(scope.split(","))
-                    .map (String::trim)
-                    .collect(Collectors.toList());
-            oa.setScope(sc);
-        } else {
-            oa.setScope(null);
-        }
+        oa.setScope(scope);
 
         Map<String, String> response = oa.getToken();
         if (response != null) {
