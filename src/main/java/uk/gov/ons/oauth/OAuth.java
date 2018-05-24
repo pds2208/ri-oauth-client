@@ -9,7 +9,6 @@ import javax.json.JsonReader;
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -102,7 +101,7 @@ public class OAuth {
             parameters.put("client_id", clientId);
             parameters.put("client_secret", clientSecret);
 
-            if (scope != null && scope.length != 0) {
+            if (scope != null && scope.length() != 0) {
                 parameters.put("scope", scope);
             }
 
