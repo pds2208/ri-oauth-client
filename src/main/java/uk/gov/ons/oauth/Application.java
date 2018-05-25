@@ -2,8 +2,9 @@ package uk.gov.ons.oauth;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.ons.oauth.uk.gov.ons.oauth.client.CACredentials;
-import uk.gov.ons.oauth.uk.gov.ons.oauth.client.CAOAuthClient;
+import uk.gov.ons.oauth.uk.gov.ons.oauth.client.OAuthOptions;
+import uk.gov.ons.oauth.uk.gov.ons.oauth.client.ca.CACredentials;
+import uk.gov.ons.oauth.uk.gov.ons.oauth.client.ca.CAOAuthClient;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
@@ -28,7 +29,6 @@ public class Application {
     }
 
     private void start() {
-        CAOAuthClient oa = new CAOAuthClient();
 
         Properties p = loadProperties();
         String clientId = p.getProperty("oauth.client.id");
@@ -39,14 +39,22 @@ public class Application {
         String connectionTimeout = p.getProperty("oauth.client.connectionTimeout", "5000");
         String readTimeout = p.getProperty("oauth.client.readTimeout", "5000");
 
-        oa.setClientId(clientId);
-        oa.setClientSecret(clientSecret);
-        oa.setTokenEndpoint(tokenEndpoint);
-        oa.setServiceEndpoint(serviceEndpoint);
-        oa.setReadTimeout(Integer.parseInt(readTimeout));
-        oa.setConnectTimeout(Integer.parseInt(connectionTimeout));
-        oa.setScope(scope);
+        OAuthOptions o = new OAuthOptions();
+        o.setClientId(clientId);
+        o.setClientSecret(clientSecret);
+        o.setTokenEndpoint(tokenEndpoint);
+        o.setServiceEndpoint(serviceEndpoint);
+        o.setReadTimeout(Integer.parseInt(readTimeout));
+        o.setConnectionTimeout(Integer.parseInt(connectionTimeout));
+        o.setScope(scope);
 
+        CACredentials ca = new CACredentials();
+
+        CAOAuthClient oa = new CAOAuthClient(o, ca);
+
+        logger.debug(oa.callService());
+        logger.debug(oa.callService());
+        logger.debug(oa.callService());
         logger.debug(oa.callService());
 
         exit(0);
