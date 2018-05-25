@@ -2,13 +2,13 @@ package uk.gov.ons.oauth;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.ons.oauth.uk.gov.ons.oauth.client.CACredentials;
+import uk.gov.ons.oauth.uk.gov.ons.oauth.client.CAOAuthClient;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.lang.System.exit;
 
@@ -28,7 +28,7 @@ public class Application {
     }
 
     private void start() {
-        OAuth oa = new OAuth();
+        CAOAuthClient oa = new CAOAuthClient();
 
         Properties p = loadProperties();
         String clientId = p.getProperty("oauth.client.id");
@@ -47,10 +47,8 @@ public class Application {
         oa.setConnectTimeout(Integer.parseInt(connectionTimeout));
         oa.setScope(scope);
 
-        Map<String, String> response = oa.getToken();
-        if (response != null) {
-            logger.debug(oa.callService(response.get("access_token")));
-        }
+        logger.debug(oa.callService());
+
         exit(0);
     }
 

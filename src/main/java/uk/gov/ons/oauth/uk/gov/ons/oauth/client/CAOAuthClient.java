@@ -1,4 +1,4 @@
-package uk.gov.ons.oauth;
+package uk.gov.ons.oauth.uk.gov.ons.oauth.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class OAuth {
+public class CAOAuthClient {
 
     private String clientId;
     private String clientSecret;
@@ -21,8 +21,10 @@ public class OAuth {
     private String serviceEndpoint;
     private int connectTimeout = 5000;
     private int readTimeout = 5000;
+    private CACredentials credentials = new CACredentials();
 
-    private static Logger logger = LoggerFactory.getLogger(OAuth.class);
+    private static Logger logger = LoggerFactory.getLogger(CAOAuthClient.class);
+    private Map<String, String> params;
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
@@ -52,13 +54,14 @@ public class OAuth {
         this.readTimeout = readTimeout;
     }
 
-    public String callService(String token) {
+    public String callService() {
 
         try {
+
             URL url = new URL(serviceEndpoint);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
-            con.setRequestProperty("Authorization", "Bearer " + token);
+            con.setRequestProperty("Authorization", "Bearer " + getToken());
 
             con.setConnectTimeout(connectTimeout);
             con.setReadTimeout(readTimeout);
@@ -82,11 +85,14 @@ public class OAuth {
 
     }
 
-    public Map<String, String> getToken() {
+    private CACredentials getToken() {
 
         assert (clientId != null);
         assert (clientSecret != null);
-        assert (scope != null);
+
+        if (credentials.tokenIsValid()) {
+            return credentials;
+        }
 
         HttpURLConnection con;
 
@@ -129,7 +135,10 @@ public class OAuth {
                 while ((inputLine = in.readLine()) != null) {
                     content.append(inputLine);
                 }
-                return parseJSON(content.toString());
+                Map<String, String> response = parseJSON(content.toString());
+                CACredentials ca= new CACredentials();
+                ca.setToken(response.get("access_token"));
+                return ca;
             }
 
         } catch (IOException e) {
@@ -139,8 +148,8 @@ public class OAuth {
 
     }
 
-    private static String getParamsString(Map<String, String> params)
-            throws UnsupportedEncodingException {
+    private String getParamsString(Map<String, String> params) throws UnsupportedEncodingException {
+        this.params = params;
         StringBuilder result = new StringBuilder();
 
         for (Map.Entry<String, String> entry : params.entrySet()) {
